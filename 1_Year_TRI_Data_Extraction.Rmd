@@ -1,0 +1,27 @@
+---
+title: "5_Year_TRI_Data_Extraction"
+author: "Nick Ferreira"
+date: '2022-05-09'
+output: html_document
+---
+
+
+```{r}
+# Import TRI Data
+TRI_2014_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2014_Trimmed.csv")
+TRI_2015_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2015_Trimmed.csv")
+TRI_2016_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2016_Trimmed.csv")
+TRI_2017_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2017_Trimmed.csv")
+TRI_2018_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2018_Trimmed.csv")
+```
+
+```{r}
+TRI_5year <- do.call("rbind", list(TRI_2014_Trimmed, TRI_2015_Trimmed, TRI_2016_Trimmed, TRI_2017_Trimmed, TRI_2018_Trimmed))
+TRI_5year <- TRI_5year[-c(2144, 4211, 6221, 8201),]
+TRI_5year <- within(TRI_5year, rm("X45..FORM.TYPE", "X50..5.4...UNDERGROUND", "X53..5.5.1...LANDFILLS", "X57..5.5.3...SURFACE.IMPNDMNT", "X74..6.2...M63"))
+
+names(TRI_5year) <- c("Year", "County", "Industry.sector", "Chemical", "Clean.air.act.chemical", "Classification", "Metal", "Metal.category", "Carcinogen", "PFAS", "Fugitive.air.emissions", "Stack.air.emissions", "Surface.water.discharges", "Class.1.well.injections", "Class.2.well.injections", "RCRA.landfill", "non-RCRA.landfill", "Land.treatment.application.farming", "RCRA.surface.impoundment", "non-RCRA.surface.impoundment", "non.landfill.land.treatment.surface.impoundment.disposal", "Onsite.total.release", "POTW.transfers.for.release.disposal.", "POTW.transfers.for.treatment", "POTW.total.transfers", "transfer.for.storage.only", "transfer.for.solidification", "transfer.of.wastewater.treatment", "transfer.of.m40.metal", "transfer.of.m61.metal", "transfer.for.underground.injection", "transfer.for.class1.injection", "transfer.for.class2.injection", "transfer.for.landfills.surface.impoundments", "transfer.for RCRA.subtitle3.surface.impoundments", "transfer.of.other.surface.impoundments", "transfer.to.other.landfills", "transfer.to.RCRA.subtitle3.landfills", "transfer.for.land.treatment", "transfer.for.land.disposal", "transfer.for.other.offsite.management", "transfer.to.waste.broker", "unknown.transfer", "offsite.release.total", "transfer.of.solvents/organics", "transfer.for.metals.recovery", "transfer.for.other.recovery/reuse", "transfer.for.acid.regeneration", "transfer.to.waste.broker", "off.site.recycled.total", "transfer.for.energy.recover", "transfer.to.waste.broker/energy.recovery", "offsite.energy.recovery.total", "non-metal.solidification/stabilization", "transfer.for.incineration/thermal.treatment", "transfer.for.incineration/insignificant.fuel.value", "transfer.of.m61.non.metal", "transfer.for.other.waste.treatment", "transfer.to.waste.broker/waste.treatment", "offsite.treated.total", "total.quantity.of.unclassified", "total.offsite.transfer.quantity", "on.site.and.off.site.total.releases", "some.other.total.releases", "onsite.contained.releases", "onsite.other.releases", "offsite.contained.releases", "offsite.other.releases", "energy.recovery.onsite", "energy.recovery.offsite", "recycling.onsite.", "recycling.offsite", "treatment.onsite", "treatment.offsite", "production.waste", "one.time.release", "production.ratio.or.activity.index", "production.ratio")
+
+write.csv(TRI_5year, file = "TRI_5year.csv")
+
+```
