@@ -1,0 +1,82 @@
+---
+title: "ForLoop"
+author: "Nick Ferreira"
+date: "2/22/2022"
+output: html_document
+---
+
+```{r}
+data_files = list.files(path = "C:/Users/nkfer/OneDrive/Pace/TRI Thesis/CountyCancer_CSV",
+                        pattern = "*County",
+                        full.names = TRUE)
+
+results <- c()
+
+library(tidyr)
+library(dplyr)
+
+# Import Cancer data by County and merge into 1 
+
+for (i in 1:length(data_files)){
+  filename <- data_files[i]
+  print(filename)
+  data <- read.csv(filename, skip = 2)
+  data$X <- NULL
+  data_transform = data %>%
+    separate(X95..CI, sep = "-", c("mf_95lower", "mf_95upper")) %>%
+    separate(X95..CI.1, sep = "-", c("m_95lower", "m_95upper")) %>%
+    separate(X95..CI.2, sep = "-", c("f_95lower", "f_95upper")) %>%
+    separate(X95..CI.3, sep = "-", c("mf__95lower", "mf__95upper")) %>%
+    separate(X95..CI.4, sep = "-", c("m__95lower", "m__95upper")) %>%
+    separate(X95..CI.5, sep = "-", c("f__95lower", "f__95upper"))
+  data_numeric = transform(data_transform, mf_95lower = as.numeric(data_transform$mf_95lower),
+                           mf_95upper = as.numeric(data_transform$mf_95upper),
+                           m_95lower = as.numeric(data_transform$m_95lower),
+                           m_95upper = as.numeric(data_transform$m_95upper),
+                           f_95lower = as.numeric(data_transform$f_95lower),
+                           f_95upper = as.numeric(data_transform$f_95upper),
+                           mf__95lower = as.numeric(data_transform$mf__95lower),
+                           mf__95upper = as.numeric(data_transform$mf__95upper),
+                           m__95lower = as.numeric(data_transform$m__95lower),
+                           m__95upper = as.numeric(data_transform$m__95upper),
+                           f__95lower = as.numeric(data_transform$f__95lower),
+                           f__95upper = as.numeric(data_transform$f__95upper))
+  county_name <- unlist(strsplit(filename, "/"))
+  county_name <- unlist(strsplit(c(county_name[8]), "*County.csv"))
+  data_numeric$county_name = county_name
+  results <- rbind(results, data_numeric)
+
+}
+```
+
+```{r}
+# adjust column names into usable fashion
+
+names(results) <- c("Site.of.Cancer", "Average.Annual.Cases.malefemale", "incidence.rate.per.100.000.Population.malefemale", "incidence.95lower.malefemale", "incidence.95upper.malefemale", "Average.Annual.Cases.male", "incidence.rate.per.100.000.male", "incidence.95lower.male", "incidence.95upper.male", "Average.Annual.Cases.female", "Rate.per.100.000.female", "incidence.95lower.female", "incidence.95upper.female","Average.Annual.Deaths.malefemale", "mortality.rate.per.100.000.Population.malefemale","mortality.95lower.malefemale",         "mortality.95upper.malefemale", "Average.Annual.Deaths.male", "mortality.rate.per.100.000.male","mortality.95lower.male", "mortality.95upper.male",      "Average.Annual.Deaths.female", "mortality.rate.per.100.000.female", "mortality.95lower.female", "mortality.95upper.female",                   
+ "county.name")
+```
+
+
+```{r}
+# Import TRI Data
+TRI_2014_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2014_Trimmed.csv")
+TRI_2015_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2015_Trimmed.csv")
+TRI_2016_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2016_Trimmed.csv")
+TRI_2017_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2017_Trimmed.csv")
+TRI_2018_Trimmed <- read.csv("C:/Users/nkfer/OneDrive/Pace/TRI Thesis/TRI_2014_2019/TRI_2018_Trimmed.csv")
+```
+
+```{r}
+TRI_5year <- do.call("rbind", list(TRI_2014_Trimmed, TRI_2015_Trimmed, TRI_2016_Trimmed, TRI_2017_Trimmed, TRI_2018_Trimmed))
+TRI_5year <- TRI_5year[-c(2144, 4211, 6221, 8201),]
+TRI_5year <- within(TRI_5year, rm("X45..FORM.TYPE", "X50..5.4...UNDERGROUND", "X53..5.5.1...LANDFILLS", "X57..5.5.3...SURFACE.IMPNDMNT", "X74..6.2...M63"))
+
+names(TRI_5year) <- c("Year", "County", "Industry.sector", "Chemical", "Clean.air.act.chemical", "Classification", "Metal", "Metal.category", "Carcinogen", "PFAS", "Fugitive.air.emissions", "Stack.air.emissions", "Surface.water.discharges", "Class.1.well.injections", "Class.2.well.injections", "RCRA.landfill", "non-RCRA.landfill", "Land.treatment.application.farming", "RCRA.surface.impoundment", "non-RCRA.surface.impoundment", "non.landfill.land.treatment.surface.impoundment.disposal", "Onsite.total.release", "POTW.transfers.for.release.disposal.", "POTW.transfers.for.treatment", "POTW.total.transfers", "transfer.for.storage.only", "transfer.for.solidification", "transfer.of.wastewater.treatment", "transfer.of.m40.metal", "transfer.of.m61.metal", "transfer.for.underground.injection", "transfer.for.class1.injection", "transfer.for.class2.injection", "transfer.for.landfills.surface.impoundments", "transfer.for RCRA.subtitle3.surface.impoundments", "transfer.of.other.surface.impoundments", "transfer.to.other.landfills", "transfer.to.RCRA.subtitle3.landfills", "transfer.for.land.treatment", "transfer.for.land.disposal", "transfer.for.other.offsite.management", "transfer.to.waste.broker", "unknown.transfer", "offsite.release.total", "transfer.of.solvents/organics", "transfer.for.metals.recovery", "transfer.for.other.recovery/reuse", "transfer.for.acid.regeneration", "transfer.to.waste.broker", "off.site.recycled.total", "transfer.for.energy.recover", "transfer.to.waste.broker/energy.recovery", "offsite.energy.recovery.total", "non-metal.solidification/stabilization", "transfer.for.incineration/thermal.treatment", "transfer.for.incineration/insignificant.fuel.value", "transfer.of.m61.non.metal", "transfer.for.other.waste.treatment", "transfer.to.waste.broker/waste.treatment", "offsite.treated.total", "total.quantity.of.unclassified", "total.offsite.transfer.quantity", "on.site.and.off.site.total.releases", "some.other.total.releases", "onsite.contained.releases", "onsite.other.releases", "offsite.contained.releases", "offsite.other.releases", "energy.recovery.onsite", "energy.recovery.offsite", "recycling.onsite.", "recycling.offsite", "treatment.onsite", "treatment.offsite", "production.waste", "one.time.release", "production.ratio.or.activity.index", "production.ratio")
+
+write.csv(TRI_5year, file = "TRI_5year.csv")
+write.csv(results, file = "Cancer_Results.csv")
+```
+
+
+
+
